@@ -1,0 +1,783 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pint Battle</title>
+
+<style>
+:root{
+  --bg:#f8fafc;
+  --card:#ffffff;
+  --card2:#eef4ff;
+  --text:#111827;
+  --muted:#6b7280;
+  --accent:#2563eb;
+  --accent-soft:#dbeafe;
+  --border:#e5e7eb;
+  --shadow:0 12px 32px rgba(37,99,235,.10), 0 8px 20px rgba(0,0,0,.06);
+  --radius:22px;
+
+  --friendly:#16a34a;
+  --friendly-bg:#ecfdf3;
+
+  --fun:#f59e0b;
+  --fun-bg:#fff7e6;
+
+  --spicy:#dc2626;
+  --spicy-bg:#fff1f2;
+
+  --random:#7c3aed;
+  --random-bg:#f5f3ff;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  background:
+    radial-gradient(circle at top left, #dbeafe 0%, transparent 28%),
+    radial-gradient(circle at top right, #fce7f3 0%, transparent 22%),
+    var(--bg);
+  color:var(--text);
+}
+.shell{
+  width:min(560px,94vw);
+  margin:0 auto;
+  padding:24px 18px 60px;
+}
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  margin-bottom:12px;
+}
+.logoBtn{
+  appearance:none;
+  background:none;
+  border:none;
+  padding:0;
+  margin:0;
+  cursor:pointer;
+  color:inherit;
+}
+.logoBtn:hover .title{
+  opacity:.82;
+}
+.title{
+  font-weight:950;
+  font-size:24px;
+  letter-spacing:-0.4px;
+}
+.meta{
+  font-size:13px;
+  color:var(--muted);
+}
+.progress{
+  height:8px;
+  background:#e5e7eb;
+  border-radius:999px;
+  overflow:hidden;
+  margin-bottom:24px;
+  border:1px solid #dbe1ea;
+}
+.progress > div{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg, #60a5fa, #2563eb);
+  transition:width .2s ease;
+}
+
+/* stage */
+.stage{
+  position:relative;
+  height:600px;
+}
+.card{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:22px;
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  user-select:none;
+  touch-action:pan-y;
+  transition:transform .18s ease;
+  overflow:hidden;
+}
+.card::before{
+  content:"";
+  position:absolute;
+  inset:0 0 auto 0;
+  height:8px;
+  background:linear-gradient(90deg, #60a5fa, #a78bfa, #f472b6);
+}
+.card.back{
+  transform:scale(.97) translateY(10px);
+  background:linear-gradient(180deg, #f3f7ff 0%, #eef4ff 100%);
+  opacity:.86;
+}
+
+.cardTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-top:4px;
+}
+.pill{
+  font-size:12px;
+  color:var(--muted);
+  padding:7px 12px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  background:#fff;
+  font-weight:800;
+}
+.categoryLabel{
+  font-size:11px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.8px;
+  color:var(--accent);
+  margin-top:4px;
+}
+.prompt{
+  font-size:25px;
+  font-weight:950;
+  line-height:1.18;
+  letter-spacing:-.3px;
+}
+.actionBox{
+  border:1px solid #dbeafe;
+  background:linear-gradient(180deg, #eff6ff 0%, #ffffff 100%);
+  border-radius:18px;
+  padding:16px;
+  display:grid;
+  gap:8px;
+}
+.actionTitle{
+  font-size:12px;
+  letter-spacing:.7px;
+  text-transform:uppercase;
+  font-weight:900;
+  color:var(--muted);
+}
+.actionText{
+  font-size:17px;
+  font-weight:900;
+  line-height:1.35;
+}
+.instructions{
+  font-size:15px;
+  line-height:1.48;
+  color:var(--text);
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:14px 16px;
+}
+.instructions ul{
+  margin:10px 0 0 18px;
+  padding:0;
+}
+.instructions li{
+  margin:7px 0;
+}
+
+/* choices */
+.choices{
+  margin-top:auto;
+  display:grid;
+  gap:10px;
+}
+.choice{
+  padding:13px 14px;
+  border-radius:16px;
+  border:1px solid var(--border);
+  background:#fff;
+  font-weight:900;
+  text-align:left;
+  cursor:pointer;
+  transition:all .15s ease;
+}
+.choice:hover{
+  transform:translateY(-1px);
+}
+.choice.selected{
+  box-shadow:0 0 0 3px rgba(37,99,235,.10);
+}
+
+.choice.friendly{
+  background:var(--friendly-bg);
+  border-color:#bbf7d0;
+}
+.choice.fun{
+  background:var(--fun-bg);
+  border-color:#fde68a;
+}
+.choice.spicy{
+  background:var(--spicy-bg);
+  border-color:#fecdd3;
+}
+.choice.random{
+  background:var(--random-bg);
+  border-color:#ddd6fe;
+}
+
+.choice.selected.friendly{
+  border-color:var(--friendly);
+  box-shadow:0 0 0 3px rgba(22,163,74,.12);
+}
+.choice.selected.fun{
+  border-color:var(--fun);
+  box-shadow:0 0 0 3px rgba(245,158,11,.14);
+}
+.choice.selected.spicy{
+  border-color:var(--spicy);
+  box-shadow:0 0 0 3px rgba(220,38,38,.12);
+}
+.choice.selected.random{
+  border-color:var(--random);
+  box-shadow:0 0 0 3px rgba(124,58,237,.12);
+}
+
+.choiceTop{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:center;
+}
+.choiceTitle{
+  font-size:15px;
+  font-weight:950;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.choiceEmoji{
+  font-size:18px;
+  width:24px;
+  text-align:center;
+}
+.choiceMeta{
+  font-size:12px;
+  color:var(--muted);
+  font-weight:800;
+}
+
+.hintRow{
+  display:flex;
+  justify-content:space-between;
+  font-size:12px;
+  color:var(--muted);
+  margin-top:10px;
+}
+.btnRow{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.btn{
+  appearance:none;
+  border:1px solid var(--border);
+  background:#fff;
+  color:var(--text);
+  padding:12px 16px;
+  border-radius:14px;
+  font-weight:900;
+  cursor:pointer;
+  transition:all .15s ease;
+}
+.btn:hover{
+  background:#f3f4f6;
+}
+
+/* small screens */
+@media (max-width: 480px){
+  .stage{ height:640px; }
+  .prompt{ font-size:22px; }
+  .actionText{ font-size:16px; }
+}
+</style>
+</head>
+
+<body>
+<div class="shell">
+  <div class="topbar">
+    <button class="logoBtn" id="logoBtn" aria-label="Go to instructions">
+      <div class="title">Pint Battle</div>
+    </button>
+    <div class="meta" id="meta"></div>
+  </div>
+  <div class="progress"><div id="progressFill"></div></div>
+  <div class="stage" id="stage"></div>
+</div>
+
+<script>
+const ACTIONS = {
+  friendly: [
+    { category: "Friendly", text: "Give someone at the table a genuine compliment." },
+    { category: "Friendly", text: "Tell a short story about a time someone helped you." },
+    { category: "Friendly", text: "Ask someone a thoughtful question and listen all the way through." },
+    { category: "Friendly", text: "High five everyone at the table." },
+    { category: "Friendly", text: "Name one good thing about today." }
+  ],
+
+  fun: [
+    { category: "Fun", text: "Do a 5-second dance move like you mean it." },
+    { category: "Fun", text: "Tell the worst joke you know with total confidence." },
+    { category: "Fun", text: "Make up a ridiculous product and give it a sales pitch." },
+    { category: "Fun", text: "Create a group chant and get everyone to do it once." },
+    { category: "Fun", text: "Speak in a dramatic movie trailer voice for 15 seconds." }
+  ],
+
+  spicy: [
+    { category: "Spicy", text: "Deliver a playful flirty line to someone at the table." },
+    { category: "Spicy", text: "Hold eye contact with someone for 5 seconds." },
+    { category: "Spicy", text: "Say one harmless thing you find attractive in a person." },
+    { category: "Spicy", text: "Whisper something playful, but keep it respectful." },
+    { category: "Spicy", text: "Describe your ideal first kiss in one sentence." },
+	{ category: "Sip Or Sin", text:  "Pleasure Yourself While Your Partner Watches" },
+	{ category: "Sip Or Sin", text:  "Throw On Those High Heals And Ride Him Like A Queen" },
+	{ category: "Sip Or Sin", text:  "Record Yourself While He Fucks You From Behind" },
+	{ category: "Sip Or Sin", text:  "Take Off One Item Of Clothing" },
+	{ category: "Sip Or Sin", text:  "Pleasure Her With an Ice Cube in Your Mouth Until It Melts Away" },
+	{ category: "Sip Or Sin", text:  "Try Two Sex Positions in Front of a Mirror" },
+	{ category: "Sip Or Sin", text:  "Do Whatever Your Partner Asks For" },
+	{ category: "Sip Or Sin", text:  "Send Your Partner a Naughty Pic from the Bathroom" },
+	{ category: "Sip Or Sin", text:  "Flash Your Favorite Body Part" },
+	{ category: "Sip Or Sin", text:  "Fuck Her On The Kitchen Table" },
+	{ category: "Sip Or Sin", text:  "Blindfold Yourself and Do Everything She Says" },
+	{ category: "Sip Or Sin", text:  "Put On Your Favorite Porn" },
+	{ category: "Sip Or Sin", text:  "Tie Him and Ride Him in Reverse Cowgirl Position" },
+	{ category: "Sip Or Sin", text:  "Play Hide and Seek Naked" },
+	{ category: "Sip Or Sin", text:  "Touch Her G-Spot Using Three Fingers" },
+	{ category: "Sip Or Sin", text:  "Make Her Come With Your Mouth Only" },
+	{ category: "Sip Or Sin", text:  "Twerk On His Face" },
+	{ category: "Sip Or Sin", text:  "Pleasure Yourself and Be Very Vocal" },
+	{ category: "Sip Or Sin", text:  "Breath Warm Air Into Her Mouth and Kiss Her Slowly" },
+	{ category: "Sip Or Sin", text:  "Tie Him Up and Seduce Him Slowly" },
+	{ category: "Sip Or Sin", text:  "Ride Him Slow Touching Your Clit and Give Him Your Sexiest Look" },
+	{ category: "Sip Or Sin", text:  "Pick An Outfit For Him To Wear" },
+	{ category: "Sip Or Sin", text:  "Create A New Sex Position" },
+	{ category: "Sip Or Sin", text:  "Tell Her Your Wildest Sex Fantasy" },
+	{ category: "Sip Or Sin", text:  "Receive A Naked Massage" },
+	{ category: "Sip Or Sin", text:  "Give Him A Handjob Using Both Hands" },
+	{ category: "Sip Or Sin", text:  "Place Her Face Down On a Table And Take Her From Behind" },
+	{ category: "Sip Or Sin", text:  "Kiss Your Favorite Part Of Her Body" },
+	{ category: "Sip Or Sin", text:  "Kiss The Part Of Her Body Where You Want To Come" },
+	{ category: "Sip Or Sin", text:  "Rub Your Dick Along Her Opening Without Going Inside" },
+	{ category: "Sip Or Sin", text:  "Put On Your Sexiest Lingerie" },
+	{ category: "Sip Or Sin", text:  "Take A Picture Of Her Pussy And Set It As Your Lock Screen" },
+	{ category: "Sip Or Sin", text:  "Pick An Outfit For Her To Wear" },
+	{ category: "Sip Or Sin", text:  "Take One Sip Each" },
+	{ category: "Sip Or Sin", text:  "Show Your Best Lap Dance" },
+	{ category: "Sip Or Sin", text:  "Give Your Most Sensual Kiss" },
+	{ category: "Sip Or Sin", text:  "Lick Her Nipples" },
+	{ category: "Sip Or Sin", text:  "Tell Him Your Favorite Thing To Do In Bed" },
+	{ category: "Sip Or Sin", text:  "Perform A Nude Catwalk" },
+	{ category: "Sip Or Sin", text:  "Lick And Suck Their Ear" },
+	{ category: "Sip Or Sin", text:  "Kiss Your Partner Like It's The First Time" },
+	{ category: "Sip Or Sin", text:  "Open The Windows For The Rest Of The Game" },
+	{ category: "Sip Or Sin", text:  "Give Them Your Best Pickup Line" },
+	{ category: "Sip Or Sin", text:  "Sloppy Wet Kisses" },
+	{ category: "Sip Or Sin", text:  "Undo Her Bra Without Using Any Hands" },
+	{ category: "Sip Or Sin", text:  "Name Dirty Words for 69 Seconds" },
+	{ category: "Sip Or Sin", text:  "Put Your Finger Inside Her  Pause Lock Eyes- And Kiss Her Like It's Your First Time" },
+	{ category: "Sip If", text:  "Drink If You Had Public Sex In the Last Month" },
+	{ category: "Sip If", text:  "Drink If You Have a Sex Playlist" },
+	{ category: "Sip If", text:  "Drink If You Like a Nasty Blow Job" },
+	{ category: "Sip If", text:  "Drink If Your Favorite Position is Doggy" },
+	{ category: "Sip If", text:  "Drink If You Had Sex With More Than One Person The Same Day" },
+	{ category: "Sip If", text:  "Drink If You've Ever Role-Played In The Bedroom (Or want to)" },
+	{ category: "Sip If", text:  "Drink If You Tasted Your Own Cum" },
+	{ category: "Sip If", text:  "Drink If Had Sex With The Same Gender" },
+	{ category: "Sip If", text:  "Drink If You Like A Quickie" },
+	{ category: "Sip If", text:  "Drink If You Love High Sex" },
+	{ category: "Sip If", text:  "Drink If You Love Drunk Sex" },
+	{ category: "Sip If", text:  "Drink If You Like Spanking" },
+	{ category: "Sip If", text:  "Drink If You Used A Fruit As A Sex Toy" },
+	{ category: "Sip If", text:  "Drink If You Came At The Same Time" },
+	{ category: "Sip If", text:  "Drink If You Are Obsessed With His Dick" },
+	{ category: "Sip If", text:  "Drink If You Have Tried BDSM" },
+	{ category: "Sip If", text:  "Drink If You Would Consider Trying Swinging" },
+	{ category: "Sip If", text:  "Drink If You 've Had Sex In A Car" },
+	{ category: "Sip If", text:  "Drink If You Moan The Loudest" },
+	{ category: "Sip If", text:  "Drink If You Already Had An Orgasm Today" },
+	{ category: "Sip If", text:  "Drink If You Would Try Having A Threesome" },
+	{ category: "Sip If", text:  "Drink If You Have Been Caught Having Sex" },
+	{ category: "Sip If", text:  "Drink If You Had Sex In An Airplane" },
+	{ category: "Sip If", text:  "Drink If You Had Sex In A Nightclub" },
+	{ category: "Sip If", text:  "Drink If You Like It In The Ass" },
+	{ category: "Sip If", text:  "Drink If You Like Name Calling During Sex" },
+	{ category: "Sip If", text:  "Drink If You're The Best Kisser" },
+	{ category: "Sip If", text:  "Drink If You Fucked More Than 4 Times In One Day" },
+	{ category: "Sip If", text:  "Drink If You Had Sex Infront Of A Mirror" },
+	{ category: "Sip If", text:  "Drink If You Had Sex In The Ocean" },
+	{ category: "Sip If", text:  "Drink If You Had Sex In Front Of Others" },
+	{ category: "Sip If", text:  "Drink If You've Been To A Strip Club" },
+	{ category: "Sip If", text:  "Drink If You Ever Made A Porno Movie" },
+	{ category: "Sip If", text:  "Drink If You Ever Made A Sex Tape" },
+	{ category: "Sip If", text:  "Drink If You've Slept With Your Friend's Ex" },
+	{ category: "Sip If", text:  "Drink If You've Had Sexual Fantasies About The Opposite Gender" },
+	{ category: "Sip If", text:  "Drink If You've Done It In Public" },
+	{ category: "Sip If", text:  "Drink If You've Had Sex With Someone Twice Your Age" },
+	{ category: "Sip If", text:  "Drink If Have You Ever Came In Your Dream" },
+	{ category: "Sip If", text:  "Drink If You Had An Erotic Photoshoot" },
+	{ category: "Sip If", text:  "Drink If You Are The Biggest Freak" },
+	{ category: "Sip If", text:  "Drink If You Like Morning Sex" },
+	{ category: "Sip If", text:  "Drink If You Had Sex ON Viagra" },
+	{ category: "Sip If", text:  "Drink If You've Ever Role-Played In The Bedroom (Or want to)" }
+  ]
+};
+
+const CHOICE_CONFIG = {
+  friendly: {
+    label: "Friendly",
+    emoji: "😊",
+    meta: "warm / easygoing",
+    className: "friendly"
+  },
+  fun: {
+    label: "Fun",
+    emoji: "😄",
+    meta: "playful / silly",
+    className: "fun"
+  },
+  spicy: {
+    label: "Spicy",
+    emoji: "🔥",
+    meta: "flirty / bolder",
+    className: "spicy"
+  },
+  random: {
+    label: "Random",
+    emoji: "🎲",
+    meta: "surprise me",
+    className: "random"
+  }
+};
+
+const SWIPE_THRESHOLD = 120;
+const EXIT_DISTANCE = 520;
+const EXIT_MS = 160;
+
+let history = [];
+let currentCard = null;
+let nextType = null;
+let cardCount = 0;
+let animLock = false;
+
+const stage = document.getElementById("stage");
+const meta = document.getElementById("meta");
+const progressFill = document.getElementById("progressFill");
+const logoBtn = document.getElementById("logoBtn");
+
+function escapeHtml(str){
+  return String(str)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function randomFrom(array){
+  return array[Math.floor(Math.random() * array.length)];
+}
+
+function setMeta(){
+  meta.textContent = `${cardCount} cards played`;
+  progressFill.style.width = `${(cardCount % 20) * 5}%`;
+}
+
+function getRandomType(){
+  return randomFrom(["friendly", "fun", "spicy"]);
+}
+
+function getNextAction(type){
+  let chosenType = type;
+  if (type === "random") {
+    chosenType = getRandomType();
+  }
+
+  const item = randomFrom(ACTIONS[chosenType]);
+  return {
+    view: "action",
+    type: chosenType,
+    displayCategory: item.category,
+    text: item.text,
+    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`
+  };
+}
+
+function makeIntroCard(){
+  return {
+    view: "intro",
+    id: "intro-card"
+  };
+}
+
+function render(cardObj){
+  stage.innerHTML = "";
+  setMeta();
+  stage.appendChild(createCard(cardObj));
+}
+
+function createCard(cardObj){
+  if (cardObj.view === "intro") return createIntroCard();
+  return createActionCard(cardObj);
+}
+
+function buildChoiceHtml(type){
+  const cfg = CHOICE_CONFIG[type];
+  return `
+    <div class="choice ${cfg.className}" data-type="${type}">
+      <div class="choiceTop">
+        <div class="choiceTitle">
+          <span class="choiceEmoji">${cfg.emoji}</span>
+          <span>${escapeHtml(cfg.label)}</span>
+        </div>
+        <div class="choiceMeta">${escapeHtml(cfg.meta)}</div>
+      </div>
+    </div>
+  `;
+}
+
+function wireChoices(card, onSelect){
+  card.querySelectorAll(".choice").forEach(btn => {
+    btn.addEventListener("pointerdown", e => e.stopPropagation());
+    btn.addEventListener("touchstart", e => e.stopPropagation(), { passive:true });
+    btn.onclick = () => {
+      card.querySelectorAll(".choice").forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      onSelect(btn.dataset.type);
+    };
+  });
+}
+
+function createIntroCard(){
+  const card = document.createElement("div");
+  card.className = "card";
+
+  card.innerHTML = `
+    <div class="cardTop">
+      <div class="pill">Pint Battle</div>
+      <div class="pill">Start Here</div>
+    </div>
+
+    <div class="categoryLabel">Instructions</div>
+    <div class="prompt">Swipe, do the action, choose what comes next.</div>
+
+    <div class="instructions">
+      <ul>
+        <li>Each card gives you an action or dare to do.</li>
+        <li>Pick what kind of next card you want: <strong>Friendly</strong>, <strong>Fun</strong>, <strong>Spicy</strong>, or <strong>Random</strong>.</li>
+        <li>Then swipe right to get your next challenge.</li>
+        <li>Swipe left to go back to the previous card.</li>
+        <li>Tap the <strong>Pint Battle</strong> logo any time to return here.</li>
+      </ul>
+    </div>
+
+    <div class="choices">
+      ${buildChoiceHtml("friendly")}
+      ${buildChoiceHtml("fun")}
+      ${buildChoiceHtml("spicy")}
+      ${buildChoiceHtml("random")}
+    </div>
+
+    <div class="hintRow">
+      <span>Swipe left: Back</span>
+      <span>Swipe right: Start</span>
+    </div>
+  `;
+
+  wireChoices(card, (selectedType) => {
+    nextType = selectedType;
+  });
+
+  attachSwipe(card, () => {
+    if (!nextType) return;
+    const next = getNextAction(nextType);
+    history.push(next);
+    currentCard = next;
+    cardCount += 1;
+    nextType = null;
+    render(next);
+  }, true);
+
+  return card;
+}
+
+function createActionCard(data){
+  const card = document.createElement("div");
+  card.className = "card";
+
+  card.innerHTML = `
+    <div class="cardTop">
+      <div class="pill">Pint Battle</div>
+      <div class="pill">${escapeHtml(data.displayCategory)}</div>
+    </div>
+
+    <div class="categoryLabel">${escapeHtml(data.displayCategory)}</div>
+    <div class="prompt">Do this:</div>
+
+    <div class="actionBox">
+      <div class="actionTitle">Action / Dare</div>
+      <div class="actionText">${escapeHtml(data.text)}</div>
+    </div>
+
+    <div class="choices">
+      ${buildChoiceHtml("friendly")}
+      ${buildChoiceHtml("fun")}
+      ${buildChoiceHtml("spicy")}
+      ${buildChoiceHtml("random")}
+    </div>
+
+    <div class="hintRow">
+      <span>Swipe left: Back</span>
+      <span>Swipe right: Next</span>
+    </div>
+
+    <div class="btnRow">
+      <button class="btn" id="backBtn">Back</button>
+      <button class="btn" id="nextBtn">Next</button>
+    </div>
+  `;
+
+  wireChoices(card, (selectedType) => {
+    nextType = selectedType;
+  });
+
+  card.querySelector("#backBtn").onclick = () => goBack();
+  card.querySelector("#nextBtn").onclick = () => {
+    if (!nextType) return;
+    const next = getNextAction(nextType);
+    history.push(next);
+    currentCard = next;
+    cardCount += 1;
+    nextType = null;
+    render(next);
+  };
+
+  attachSwipe(card, () => {
+    if (!nextType) return;
+    const next = getNextAction(nextType);
+    history.push(next);
+    currentCard = next;
+    cardCount += 1;
+    nextType = null;
+    render(next);
+  }, false);
+
+  return card;
+}
+
+function goToInstructions(){
+  currentCard = makeIntroCard();
+  nextType = null;
+  render(currentCard);
+}
+
+function goBack(){
+  if (history.length === 0) {
+    goToInstructions();
+    return;
+  }
+
+  history.pop();
+
+  if (history.length === 0) {
+    goToInstructions();
+    return;
+  }
+
+  currentCard = history[history.length - 1];
+  nextType = null;
+  render(currentCard);
+}
+
+function attachSwipe(card, onRight, isIntroCard){
+  let startX = 0;
+  let dx = 0;
+  let dragging = false;
+  let pointerId = null;
+
+  card.addEventListener("pointerdown", e => {
+    if (animLock) return;
+    if (e.button !== undefined && e.button !== 0) return;
+    if (e.target.closest(".choice, button, a, input, textarea, select, label")) return;
+
+    dragging = true;
+    pointerId = e.pointerId;
+    startX = e.clientX;
+    dx = 0;
+    card.style.transition = "none";
+    card.setPointerCapture(pointerId);
+  });
+
+  card.addEventListener("pointermove", e => {
+    if (!dragging || e.pointerId !== pointerId) return;
+    dx = e.clientX - startX;
+    card.style.transform = `translateX(${dx}px) rotate(${dx/20}deg)`;
+  });
+
+  function resetCard(){
+    card.style.transition = "transform .18s ease";
+    card.style.transform = "translateX(0) rotate(0deg)";
+  }
+
+  function endGesture(){
+    if (!dragging) return;
+    dragging = false;
+
+    if (dx > SWIPE_THRESHOLD) {
+      if (!nextType) {
+        resetCard();
+        return;
+      }
+      animLock = true;
+      card.style.transition = "transform .14s ease";
+      card.style.transform = `translateX(${EXIT_DISTANCE}px) rotate(18deg)`;
+      setTimeout(() => {
+        animLock = false;
+        onRight();
+      }, EXIT_MS);
+    } else if (dx < -SWIPE_THRESHOLD) {
+      if (isIntroCard && history.length === 0) {
+        resetCard();
+        return;
+      }
+      animLock = true;
+      card.style.transition = "transform .14s ease";
+      card.style.transform = `translateX(-${EXIT_DISTANCE}px) rotate(-18deg)`;
+      setTimeout(() => {
+        animLock = false;
+        goBack();
+      }, EXIT_MS);
+    } else {
+      resetCard();
+    }
+  }
+
+  card.addEventListener("pointerup", endGesture);
+  card.addEventListener("pointercancel", () => {
+    dragging = false;
+    resetCard();
+  });
+  card.addEventListener("lostpointercapture", endGesture);
+}
+
+logoBtn.addEventListener("click", () => {
+  goToInstructions();
+});
+
+currentCard = makeIntroCard();
+render(currentCard);
+</script>
+</body>
+</html>
